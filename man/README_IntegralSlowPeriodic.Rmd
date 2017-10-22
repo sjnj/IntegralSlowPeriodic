@@ -1,0 +1,62 @@
+---
+title: "README"
+author: "Santos J. NÃƒÂºÃƒÂ±ez JareÃƒÂ±o"
+date: "21 de octubre de 2017"
+output:
+  html_document: default
+  pdf_document: default
+---
+#The int_slow_periodic class
+
+This package contains the code to build the int_slow_periodic class. This class implements a simple algorithm to integrate analytically functions that due to its fast oscillatory behaviour are difficult to evaluate numerically. Moreover, this strategy can also be helpful to solve some stiff differential equations.
+
+### Theoretical description:
+
+In order to apply this method the integrand function must have the following structure:
+
+$$ I = \int^{t_f}_{t_i} F(t) \tilde{P}(t) dt = c_0\int^{t_f}_{t_i} F(t) dt + \int^{t_f}_{t_i} F(t) P(t) dt ,$$
+
+where $\dot{P}(t)/P(t) \gg \dot{F}(t)/F(t)$, $\tilde{P}(t)$ is periodic with frequency $\omega$ and $P(t)$ is equivalent to $\tilde{P}(t)$ when its constant Fourier mode, $c_0$, is substracted. Thus, we will call $F(t)$ the slow-part and $P(t)$ the (fast-)periodic-part. Integrating by parts the second integral, we obtain:
+
+$$I = \left[F(t)\int^tP(t')dt' \right]^{t_f}_{t_i} - \left[F'(t)\int^{t}\int^{t'}P(t'')dt''dt' \right]^{t_f}_{t_i} + \dots$$
+
+
+Notice that with respect to the first term the second result smaller by approximateddly $O(\epsilon)$, where
+$$\epsilon \equiv \frac{\dot{F}(t)/F(t)}{\dot{P}(t)/P(t)} = \frac{\dot{F}(t)}{\omega F(t)} \ll 1$$.
+
+The subsequent terms will be an extra $O(\epsilon)$ smaller for each new iteration of the integration by parts procedure.
+
+With this method we can approximatedly solve analitically the integral $I$ without having to do a lot of computations due to the fast oscillations in $P(t)$. This is even more helpful for differential equations, that can be solve exploiting this method whenever the product of the source and its Green's function has the above structure, e.g. a sourced harmonic oscillator:
+
+$$\ddot{y} + \omega^2 y(t) = F(t), y(t_i) = \dot{y}(t_i)=0$$.
+
+Thus,
+$$y(t) = \int^t_{t_i} F(t') G(t,t') dt' = \int^t_{t_i} F(t') \Theta(t-t') \frac{\sin(\omega(t-t'))}{\omega} = \int^{t-t_i}_0 dt'' F(t-t'') \frac{\sin(\omega t'')}{\omega}$$
+
+### The code 
+
+The code is organised in a class called <b> <i> int_slow_periodic</i></b>. The following parameters should be passed to the constructor:
+
+<center> int_slow_periodic(f, modes, modes_coef, omega, n)</center>
+
+* <b>f</b>: a R function depending on 't' that corresponds to the slow-part, $F(t)$. Example: f = function(t) t^2
+
+* <b>modes</b>: the relevant cosine/sine Forier modes of $P(t)$ excluding the constant. Example:
+$$10+\cos(\omega t)+0.5\cos(5 \omega t)+0.3\sin(5\omega t) \rightarrow modes=c(1,5).$$
+
+* <b>modes_coef</b>: the coefficient of the chosen Forier modes of $P(t)$ including the constant. They have to be written in order and include the zero coefficients of cosine/sine modes activated. Example:
+$$10+\cos(\omega t)+0.5\cos(5 \omega t)+0.3\sin(5\omega t) \rightarrow modes\_coef=c(10,1,0,0.5,0.3).$$
+* <b>omega</b>: the frequency of $P(t)$. Example: omega=100.
+
+* <b>n</b>: the number of integration by parts that we would like to do to improve the accuracy. Example: n= 2.
+
+
+In order to solve the integration we must call to the method <b><i>Int</i></b>:
+
+Int.int_slow_periodic(object,ti,tf)
+
+* <b>ti</b>: initial time of the integral. Example: ti = 1.
+* <b>tf</b>: initial time of the integral. Example: tf = 2.
+
+
+Find more examples and comments inside the .r code.
